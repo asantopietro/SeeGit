@@ -96,14 +96,29 @@ namespace SeeGit
 
         private void AddCommitsToGraph(Commit commit, CommitVertex childVertex)
         {
-            var commitVertex = GetCommitVertex(commit);
-            _graph.AddVertex(commitVertex);
-            if (childVertex != null)
+            Queue<Commit> queue = new Queue<Commit>();
+            CommitVertex commitVertex = null;
+
+            queue.Enqueue(commit);
+            while (commit.ParentsCount == 1)
             {
-                var edge = new CommitEdge(childVertex, commitVertex);
-                if (_edges.ContainsKey(edge.Id)) return;
-                _graph.AddEdge(edge);
-                _edges.Add(edge.Id, edge);
+                commit = commit.Parents.First();
+                queue.Enqueue(commit);
+            }
+
+            while (queue.Count != 0)
+            {
+                var commitIter = queue.Dequeue();
+                commitVertex = GetCommitVertex(commitIter);
+                _graph.AddVertex(commitVertex);
+                if (childVertex != null)
+                {
+                    var edge = new CommitEdge(childVertex, commitVertex);
+                    if (_edges.ContainsKey(edge.Id)) return;
+                    _graph.AddEdge(edge);
+                    _edges.Add(edge.Id, edge);
+                }
+                childVertex = commitVertex;
             }
 
             foreach (var parent in commit.Parents)
