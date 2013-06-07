@@ -120,6 +120,7 @@ namespace SeeGit
                 }
                 childVertex = commitVertex;
             }
+            queue = null;
 
             foreach (var parent in commit.Parents)
             {
